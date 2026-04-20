@@ -6,7 +6,7 @@ try:
     from pyzbar.pyzbar import decode as pyzbar_decode
     from PIL import Image
     HAS_PYZBAR = True
-except ImportError:
+except Exception:
     HAS_PYZBAR = False
 
 bp = Blueprint("qr", __name__)

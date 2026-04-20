@@ -6,13 +6,13 @@ from PIL.ExifTags import TAGS
 try:
     from rembg import remove as rembg_remove
     HAS_REMBG = True
-except ImportError:
+except Exception:
     HAS_REMBG = False
 
 try:
     import pytesseract
     HAS_TESSERACT = True
-except ImportError:
+except Exception:
     HAS_TESSERACT = False
 
 bp = Blueprint("image", __name__)
