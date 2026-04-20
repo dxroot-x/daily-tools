@@ -139,7 +139,29 @@ The core app works out of the box with the main dependencies. Some features requ
 | `rembg` | Remove Background | Installs ONNX Runtime (~500 MB). The app works without it and shows a helpful message if missing. |
 | `pyzbar` | Read QR Code | Requires the [ZBar](https://github.com/NaturalHistoryMuseum/pyzbar#installation) shared library on your system. |
 | `pdf2docx` | PDF to Word | Pure Python, but conversion quality depends on PDF complexity. |
-| `pytesseract` | Image to Text (OCR) | Requires the [Tesseract](https://github.com/tesseract-ocr/tesseract) binary installed on your system. |
+| `pytesseract` | Image to Text (OCR) | Requires the **Tesseract OCR** binary. See [OCR Setup](#ocr-setup) below. |
+
+---
+
+## OCR Setup
+
+To use the **Image to Text (OCR)** tool, you must install the Tesseract engine on your system:
+
+### 1. Install Tesseract Binary
+- **Windows**: 
+  - Download and run the installer from [UB-Mannheim/tesseract](https://github.com/UB-Mannheim/tesseract/wiki).
+  - Default installation path: `C:\Program Files\Tesseract-OCR\tesseract.exe`. The app will detect it automatically if installed here.
+  - Alternatively, use winget: `winget install UB-Mannheim.TesseractOCR`
+- **Linux (Ubuntu/Debian)**: `sudo apt install tesseract-ocr`
+- **macOS**: `brew install tesseract`
+
+### 2. Install Language Data (Tessdata)
+For Indonesian support, you need the `ind.traineddata` file:
+1. Download `ind.traineddata` from [tessdata repository](https://github.com/tesseract-ocr/tessdata/blob/main/ind.traineddata).
+2. Place it in the `tessdata` folder of your Tesseract installation (e.g., `C:\Program Files\Tesseract-OCR\tessdata\`).
+3. Ensure `eng.traineddata` is also present for English support.
+
+---
 
 If you only need the core tools, install the minimal set:
 

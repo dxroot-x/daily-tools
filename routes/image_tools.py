@@ -555,7 +555,7 @@ def favicon():
 @bp.route("/ocr", methods=["POST"])
 def ocr():
     if not HAS_TESSERACT:
-        return jsonify(error="OCR requires 'pytesseract' package and Tesseract binary. Install with: pip install pytesseract, then install Tesseract from https://github.com/tesseract-ocr/tesseract"), 400
+        return jsonify(error="OCR requires the 'pytesseract' Python package. Please run 'pip install pytesseract' and ensure Tesseract binary is installed on your system."), 400
 
     files = request.files.getlist("files")
     if not files or not files[0].filename:
@@ -579,9 +579,12 @@ def ocr():
     try:
         text = pytesseract.image_to_string(img, lang=lang)
     except pytesseract.pytesseract.TesseractNotFoundError:
-        return jsonify(error="Tesseract OCR executable is not installed or not in PATH. Please install it using `winget install UB-Mannheim.TesseractOCR` or download from https://github.com/UB-Mannheim/tesseract/wiki"), 400
+        return jsonify(error="Tesseract binary not found. Please install Tesseract (e.g., from UB-Mannheim/tesseract for Windows) and ensure it's in your PATH or installed at 'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'."), 400
     except Exception as e:
-        return jsonify(error=f"OCR processing failed: {str(e)}"), 500
+        err_msg = str(e)
+        if "tessdata" in err_msg.lower() or "traineddata" in err_msg.lower():
+            return jsonify(error=f"OCR Language data missing: {err_msg}. Please download the required .traineddata files (eng, ind) to your Tesseract/tessdata folder."), 400
+        return jsonify(error=f"OCR processing failed: {err_msg}"), 500
 
     if not text.strip():
         return jsonify(text="(No text detected in image)")
