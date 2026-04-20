@@ -33,7 +33,63 @@ document.addEventListener("DOMContentLoaded", () => {
     initUploadZone();
     initToolForm();
     initDependentOptions();
+    initSearch();
 });
+
+
+/* ── Search ──────────────────────────────────── */
+function initSearch() {
+    const input = document.getElementById("tool-search");
+    if (!input) return;
+
+    // "/" keyboard shortcut to focus search
+    document.addEventListener("keydown", (e) => {
+        if (e.key === "/" && document.activeElement.tagName !== "INPUT" && document.activeElement.tagName !== "TEXTAREA") {
+            e.preventDefault();
+            input.focus();
+        }
+        if (e.key === "Escape" && document.activeElement === input) {
+            input.value = "";
+            input.blur();
+            filterTools("");
+        }
+    });
+
+    input.addEventListener("input", (e) => {
+        filterTools(e.target.value.toLowerCase().trim());
+    });
+}
+
+function filterTools(query) {
+    const categories = document.querySelectorAll(".nav-category");
+    categories.forEach(cat => {
+        const items = cat.querySelectorAll(".nav-item");
+        let anyVisible = false;
+
+        items.forEach(item => {
+            const name = item.dataset.toolName || item.textContent.toLowerCase();
+            if (!query || name.includes(query)) {
+                item.style.display = "";
+                anyVisible = true;
+            } else {
+                item.style.display = "none";
+            }
+        });
+
+        // Show/hide category based on matching children
+        cat.style.display = anyVisible ? "" : "none";
+
+        // Auto-open categories with matches during search
+        if (query && anyVisible) {
+            const btn = cat.querySelector(".nav-category-btn");
+            const navItems = cat.querySelector(".nav-items");
+            if (btn && navItems) {
+                btn.classList.add("open");
+                navItems.classList.add("open");
+            }
+        }
+    });
+}
 
 
 /* ── Upload Zone ──────────────────────────────── */
@@ -68,11 +124,13 @@ function addFiles(fileList) {
         selectedFiles = [fileList[0]];
     }
     renderFileList();
+    renderImagePreview();
 }
 
 function removeFile(idx) {
     selectedFiles.splice(idx, 1);
     renderFileList();
+    renderImagePreview();
 }
 
 function renderFileList() {
@@ -96,10 +154,64 @@ function renderFileList() {
     `).join("");
 }
 
+function renderImagePreview() {
+    const previewArea = document.getElementById("image-preview-area");
+    if (!previewArea) return;
+
+    previewArea.innerHTML = "";
+
+    selectedFiles.forEach(f => {
+        if (!f.type.startsWith("image/")) return;
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const img = document.createElement("img");
+            img.src = e.target.result;
+            img.className = "upload-preview-img";
+            img.alt = f.name;
+            previewArea.appendChild(img);
+        };
+        reader.readAsDataURL(f);
+    });
+}
+
 function formatSize(bytes) {
     if (bytes < 1024) return bytes + " B";
     if (bytes < 1048576) return (bytes / 1024).toFixed(1) + " KB";
     return (bytes / 1048576).toFixed(1) + " MB";
+}
+
+
+/* ── Toast Notifications ─────────────────────── */
+function showToast(message, type = "info", duration = 3000) {
+    const container = document.getElementById("toast-container");
+    if (!container) return;
+
+    const toast = document.createElement("div");
+    toast.className = `toast toast-${type}`;
+
+    const icons = {
+        success: "bi-check-circle-fill",
+        error: "bi-exclamation-circle-fill",
+        info: "bi-info-circle-fill",
+        warning: "bi-exclamation-triangle-fill"
+    };
+
+    toast.innerHTML = `
+        <i class="bi ${icons[type] || icons.info}"></i>
+        <span>${message}</span>
+        <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+    `;
+
+    container.appendChild(toast);
+
+    // Trigger animation
+    requestAnimationFrame(() => toast.classList.add("show"));
+
+    setTimeout(() => {
+        toast.classList.remove("show");
+        setTimeout(() => toast.remove(), 300);
+    }, duration);
 }
 
 
@@ -121,11 +233,11 @@ function initToolForm() {
         // Validate: either files or text input required
         const textInput = form.querySelector("textarea[name='text']");
         if (!textInput && selectedFiles.length === 0) {
-            showError("Please select a file first.");
+            showToast("Please select a file first.", "warning");
             return;
         }
         if (textInput && !textInput.value.trim()) {
-            showError("Please enter some text.");
+            showToast("Please enter some text.", "warning");
             return;
         }
 
@@ -151,6 +263,7 @@ function initToolForm() {
                     msg = json.error || msg;
                 } catch (_) {}
                 showError(msg);
+                showToast(msg, "error", 5000);
                 return;
             }
 
@@ -160,10 +273,13 @@ function initToolForm() {
                 const json = await resp.json();
                 if (json.error) {
                     showError(json.error);
+                    showToast(json.error, "error", 5000);
                 } else if (json.text !== undefined) {
                     showTextResult(json.text);
+                    showToast("Text extracted successfully!", "success");
                 } else if (json.data !== undefined) {
                     showTextResult(typeof json.data === "string" ? json.data : JSON.stringify(json.data, null, 2));
+                    showToast("Done!", "success");
                 }
             } else {
                 // Binary file download
@@ -181,9 +297,11 @@ function initToolForm() {
                 } else {
                     showFileResult(url, filename, false);
                 }
+                showToast(`File "${filename}" ready for download!`, "success");
             }
         } catch (err) {
             showError("Network error: " + err.message);
+            showToast("Network error: " + err.message, "error", 5000);
         } finally {
             if (btnText) btnText.style.display = "";
             if (btnLoad) btnLoad.style.display = "none";
@@ -242,7 +360,21 @@ function showTextResult(text) {
 
 function copyResult() {
     const text = document.getElementById("result-text-content")?.textContent;
-    if (text) navigator.clipboard.writeText(text);
+    if (!text) return;
+
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = document.getElementById("copy-btn");
+        if (btn) {
+            const original = btn.innerHTML;
+            btn.innerHTML = '<i class="bi bi-check-lg"></i> Copied!';
+            btn.classList.add("copied");
+            setTimeout(() => {
+                btn.innerHTML = original;
+                btn.classList.remove("copied");
+            }, 2000);
+        }
+        showToast("Copied to clipboard!", "success", 2000);
+    });
 }
 
 

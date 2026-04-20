@@ -225,7 +225,14 @@ def ocr_page():
         endpoint="/image/ocr",
         accept=IMAGE_ACCEPT,
         multiple=False,
-        options=[])
+        options=[
+            {"type": "select", "name": "lang", "label": "Language",
+             "choices": [
+                 {"value": "eng", "label": "English"},
+                 {"value": "ind", "label": "Indonesian"},
+                 {"value": "eng+ind", "label": "English + Indonesian"},
+             ]},
+        ])
 
 
 @bp.route("/watermark")
@@ -555,8 +562,28 @@ def ocr():
         return jsonify(error="No file uploaded."), 400
 
     img = get_pil_image(files[0])
-    text = pytesseract.image_to_string(img)
+    
+    import os
+    # Fallback for Windows: set path only if Tesseract binary actually exists there
+    if os.name == 'nt':
+        common_path = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+        if os.path.exists(common_path):
+            pytesseract.pytesseract.tesseract_cmd = common_path
+
+    lang = request.form.get("lang", "eng")
+    # Validate lang to prevent injection
+    allowed_langs = {"eng", "ind", "eng+ind"}
+    if lang not in allowed_langs:
+        lang = "eng"
+
+    try:
+        text = pytesseract.image_to_string(img, lang=lang)
+    except pytesseract.pytesseract.TesseractNotFoundError:
+        return jsonify(error="Tesseract OCR executable is not installed or not in PATH. Please install it using `winget install UB-Mannheim.TesseractOCR` or download from https://github.com/UB-Mannheim/tesseract/wiki"), 400
+    except Exception as e:
+        return jsonify(error=f"OCR processing failed: {str(e)}"), 500
 
     if not text.strip():
         return jsonify(text="(No text detected in image)")
     return jsonify(text=text)
+
