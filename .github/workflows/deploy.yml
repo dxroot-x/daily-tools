@@ -1,0 +1,83 @@
+name: Deploy to VPS (Cloudflare Tunnel)
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}/daily-tools
+  CONTAINER: daily-tools
+  DOMAIN: tools.develapar.com
+
+jobs:
+  build-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      tag: ${{ steps.meta.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Docker metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.IMAGE }}
+          tags: |
+            type=sha,prefix=,format=short
+            type=ref,event=branch
+            latest
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  deploy:
+    needs: build-push
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+
+            echo ">> Pulling image..."
+            echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+            docker pull ${{ env.IMAGE }}:${{ needs.build-push.outputs.tag }}
+
+            echo ">> Stopping old container..."
+            docker stop ${{ env.CONTAINER }} 2>/dev/null || true
+            docker rm ${{ env.CONTAINER }} 2>/dev/null || true
+
+            echo ">> Starting new container..."
+            docker run -d --name ${{ env.CONTAINER }} \
+              --restart unless-stopped \
+              -p 127.0.0.1:5000:5000 \
+              -e FLASK_DEBUG=false \
+              -e MAX_CONTENT_LENGTH=104857600 \
+              ${{ env.IMAGE }}:${{ needs.build-push.outputs.tag }}
+
+            echo ">> Pruning old images..."
+            docker image prune -af --filter="label=org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}"
+
+            echo ">> Done! https://${{ env.DOMAIN }}"
