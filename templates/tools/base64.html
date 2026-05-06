@@ -41,7 +41,9 @@ function encodeB64() {
         document.getElementById("b64-encoded").value = btoa(unescape(encodeURIComponent(text)));
         document.getElementById("b64-status").innerHTML = '<span style="color:var(--success)"><i class="bi bi-check-circle"></i> Encoded</span>';
     } catch (e) {
-        document.getElementById("b64-status").innerHTML = `<span style="color:var(--danger)"><i class="bi bi-x-circle"></i> ${e.message}</span>`;
+        const st = document.getElementById("b64-status");
+        st.innerHTML = '<span style="color:var(--danger)"><i class="bi bi-x-circle"></i> </span>';
+        st.appendChild(document.createTextNode(e.message));
     }
 }
 

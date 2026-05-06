@@ -201,20 +201,23 @@ def merge():
         return jsonify(error="Please upload at least 2 PDF files."), 400
 
     result = fitz.open()
-    for f in files:
-        try:
+    try:
+        for f in files:
             doc = fitz.open(stream=f.read(), filetype="pdf")
-            result.insert_pdf(doc)
-            doc.close()
-        except Exception as e:
-            return jsonify(error=f"Error reading {f.filename}: {str(e)}"), 400
+            try:
+                result.insert_pdf(doc)
+            finally:
+                doc.close()
 
-    output = io.BytesIO()
-    result.save(output)
-    result.close()
-    output.seek(0)
-    return send_file(output, mimetype="application/pdf",
-                     as_attachment=True, download_name="merged.pdf")
+        output = io.BytesIO()
+        result.save(output)
+        output.seek(0)
+        return send_file(output, mimetype="application/pdf",
+                         as_attachment=True, download_name="merged.pdf")
+    except Exception as e:
+        return jsonify(error=f"Error reading {f.filename}: {str(e)}"), 400
+    finally:
+        result.close()
 
 
 @bp.route("/split", methods=["POST"])

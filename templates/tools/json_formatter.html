@@ -45,7 +45,8 @@ function formatJSON() {
         document.getElementById("json-output").textContent = JSON.stringify(obj, null, 2);
         status.innerHTML = '<span style="color:var(--success)"><i class="bi bi-check-circle"></i> Valid JSON</span>';
     } catch (e) {
-        status.innerHTML = `<span style="color:var(--danger)"><i class="bi bi-x-circle"></i> ${e.message}</span>`;
+        status.innerHTML = '<span style="color:var(--danger)"><i class="bi bi-x-circle"></i> </span>';
+        status.appendChild(document.createTextNode(e.message));
     }
 }
 
@@ -57,7 +58,8 @@ function minifyJSON() {
         document.getElementById("json-output").textContent = JSON.stringify(obj);
         status.innerHTML = '<span style="color:var(--success)"><i class="bi bi-check-circle"></i> Valid JSON (minified)</span>';
     } catch (e) {
-        status.innerHTML = `<span style="color:var(--danger)"><i class="bi bi-x-circle"></i> ${e.message}</span>`;
+        status.innerHTML = '<span style="color:var(--danger)"><i class="bi bi-x-circle"></i> </span>';
+        status.appendChild(document.createTextNode(e.message));
     }
 }
 

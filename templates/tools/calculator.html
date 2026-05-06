@@ -76,12 +76,24 @@ function appendOp(op) {
     updateDisplay();
 }
 
+function safeEval(expr) {
+    const tokens = expr.replace(/\s+/g, '').match(/(\d+\.?\d*|\.\d+|[+\-*/%()])/g) || [];
+    if (!tokens.length) throw new Error('Empty');
+
+    let idx = 0;
+    function parseExpr() { let v = parseTerm(); while (idx < tokens.length && (tokens[idx] === '+' || tokens[idx] === '-')) { const op = tokens[idx++]; const r = parseTerm(); v = op === '+' ? v + r : v - r; } return v; }
+    function parseTerm() { let v = parseFactor(); while (idx < tokens.length && (tokens[idx] === '*' || tokens[idx] === '/' || tokens[idx] === '%')) { const op = tokens[idx++]; const r = parseFactor(); if (op === '*') v *= r; else if (op === '/') v /= r; else v %= r; } return v; }
+    function parseFactor() { if (tokens[idx] === '(') { idx++; const v = parseExpr(); if (tokens[idx] === ')') idx++; return v; } const t = tokens[idx++]; const n = parseFloat(t); if (isNaN(n)) throw new Error('Invalid token'); return n; }
+
+    const result = parseExpr();
+    if (idx !== tokens.length) throw new Error('Trailing tokens');
+    return result;
+}
+
 function calculate() {
     const expr = expression + currentNum;
     try {
-        // Safe evaluation using Function constructor
-        let sanitized = expr.replace(/[^0-9+\-*/.%() ]/g, "");
-        let result = Function('"use strict"; return (' + sanitized + ')')();
+        let result = safeEval(expr);
         if (!isFinite(result)) throw new Error("Invalid");
         expression = expr + " =";
         currentNum = parseFloat(result.toPrecision(12)).toString();
