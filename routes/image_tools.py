@@ -90,10 +90,15 @@ def resize_page():
 def compress_page():
     return render_template("upload_tool.html",
         title="Compress Image",
-        description="Reduce image file size while controlling quality",
+        description="Reduce image file size — preview before compressing",
         endpoint="/image/compress",
         accept=IMAGE_ACCEPT,
         multiple=False,
+        interactive_preview=True,
+        interactive_config={
+            "type": "preview",
+            "toolbar": [],
+        },
         options=[
             {"type": "range", "name": "quality", "label": "Quality",
              "default": 70, "min": 10, "max": 100, "step": 5, "suffix": "%"},
@@ -104,10 +109,15 @@ def compress_page():
 def convert_page():
     return render_template("upload_tool.html",
         title="Convert Image Format",
-        description="Convert images between different formats",
+        description="Convert images between different formats — preview first",
         endpoint="/image/convert",
         accept=IMAGE_ACCEPT,
         multiple=False,
+        interactive_preview=True,
+        interactive_config={
+            "type": "preview",
+            "toolbar": [],
+        },
         options=[
             {"type": "select", "name": "format", "label": "Convert to",
              "choices": [
@@ -232,10 +242,15 @@ def exif_page():
 def favicon_page():
     return render_template("upload_tool.html",
         title="Favicon Generator",
-        description="Create a .ico favicon from any image",
+        description="Create a .ico favicon — preview at actual sizes",
         endpoint="/image/favicon",
         accept=IMAGE_ACCEPT,
         multiple=False,
+        interactive_preview=True,
+        interactive_config={
+            "type": "favicon",
+            "toolbar": [],
+        },
         options=[
             {"type": "select", "name": "sizes", "label": "Sizes to include",
              "choices": [

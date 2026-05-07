@@ -470,6 +470,8 @@ function initInteractivePreview() {
                 case "rotate": initRotateMode(canvas, img, config); break;
                 case "watermark": initWatermarkMode(canvas, img, config); break;
                 case "resize": initResizeMode(canvas, img, config); break;
+                case "favicon": initFaviconMode(canvas, img, config); break;
+                default: initPreviewMode(canvas, img, config); break;
             }
         };
         img.onerror = () => {
@@ -1037,6 +1039,87 @@ function drawResizePreview() {
     const infoEl = document.getElementById("preview-info");
     if (infoEl) infoEl.innerHTML = `<span>Original: <strong>${s.img.width}×${s.img.height}</strong></span>
         <span>New: <strong>${targetW}×${targetH}</strong></span>`;
+}
+
+
+/* ── Preview Mode (compress, convert) ─────────── */
+function initPreviewMode(canvas, img, config) {
+    drawPreviewOnly();
+    const infoEl = document.getElementById("preview-info");
+    if (infoEl) infoEl.innerHTML = `<span>Original size: <strong>${img.width}×${img.height} px</strong></span>`;
+}
+
+function drawPreviewOnly() {
+    const s = previewState;
+    const ctx = s.ctx;
+    const canvas = s.canvas;
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.drawImage(s.img, 0, 0, canvas.width, canvas.height);
+}
+
+
+/* ── Favicon Mode ─────────────────────────────── */
+function initFaviconMode(canvas, img, config) {
+    drawFaviconPreview();
+    const infoEl = document.getElementById("preview-info");
+    if (infoEl) infoEl.innerHTML = `<span>Source: <strong>${img.width}×${img.height}</strong></span>
+        <span>Preview sizes: <strong>16, 32, 48 px</strong></span>`;
+}
+
+function drawFaviconPreview() {
+    const s = previewState;
+    const ctx = s.ctx;
+    const canvas = s.canvas;
+    const cw = canvas.width, ch = canvas.height;
+    ctx.clearRect(0, 0, cw, ch);
+    ctx.fillStyle = "transparent";
+    ctx.fillRect(0, 0, cw, ch);
+
+    // Draw checkerboard for transparent areas
+    const squareSize = 6;
+    for (let y = 0; y < ch; y += squareSize) {
+        for (let x = 0; x < cw; x += squareSize) {
+            ctx.fillStyle = ((x / squareSize + y / squareSize) % 2 === 0) ? "#1e293b" : "#0f172a";
+            ctx.fillRect(x, y, squareSize, squareSize);
+        }
+    }
+
+    // Original image on left side
+    const srcW = cw * 0.5;
+    const srcH = ch * 0.55;
+    const srcX = 0;
+    const srcY = (ch - srcH) / 2;
+    const srcScale = Math.min(srcW / s.img.width, srcH / s.img.height);
+    const iw = s.img.width * srcScale, ih = s.img.height * srcScale;
+    ctx.drawImage(s.img, srcX + (srcW - iw) / 2, srcY + (srcH - ih) / 2, iw, ih);
+    ctx.strokeStyle = getBrandColor();
+    ctx.lineWidth = 1;
+    ctx.strokeRect(srcX, srcY, srcW, srcH);
+
+    // Favicon size grid on right side
+    const sizes = [16, 32, 48];
+    const gap = 20;
+    const gridX = cw * 0.5 + 20;
+    const gridW = cw * 0.5 - 40;
+    const totalH = sizes.length * (gap + 48) + gap;
+    const gridY = (ch - totalH) / 2;
+
+    sizes.forEach((size, i) => {
+        const y = gridY + i * (48 + gap);
+        const x = gridX + (gridW - size) / 2;
+
+        // Draw label
+        ctx.fillStyle = "#94a3b8";
+        ctx.font = "11px Inter, sans-serif";
+        ctx.textAlign = "right";
+        ctx.fillText(`${size}×${size}`, x - 8, y + size / 2 + 4);
+
+        // Draw sized favicon
+        ctx.drawImage(s.img, x, y, size, size);
+        ctx.strokeStyle = "#334155";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, size, size);
+    });
 }
 
 
