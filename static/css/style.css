@@ -473,12 +473,21 @@ input:focus-visible,select:focus-visible,textarea:focus-visible,.btn:focus-visib
   border-radius:var(--radius-md);
   overflow:hidden;
   display:flex;align-items:center;justify-content:center;
-  min-height:260px;
+  min-height:280px;
 }
 .interactive-canvas-wrap canvas{
   display:block;max-width:100%;max-height:70vh;
   cursor:crosshair;
 }
+.preview-placeholder{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  color:var(--text-tertiary);gap:.5rem;
+  pointer-events:none;
+}
+.preview-placeholder i{font-size:2.5rem;opacity:.4}
+.preview-placeholder p{font-size:.9rem;font-weight:500}
 .interactive-canvas-wrap canvas.crop-move{cursor:move}
 .interactive-canvas-wrap canvas.crop-nw{cursor:nwse-resize}
 .interactive-canvas-wrap canvas.crop-ne{cursor:nesw-resize}

@@ -443,6 +443,7 @@ function getBrandColor() {
 function initInteractivePreview() {
     const previewEl = document.getElementById("interactive-preview");
     const canvas = document.getElementById("preview-canvas");
+    const placeholder = document.getElementById("preview-placeholder");
     const form = document.getElementById("tool-form");
     if (!previewEl || !canvas || !form || selectedFiles.length === 0) return;
 
@@ -453,9 +454,9 @@ function initInteractivePreview() {
     const file = selectedFiles[0];
     if (!file.type.startsWith("image/")) return;
 
-    const uploadZone = document.getElementById("upload-zone");
-    if (uploadZone) uploadZone.style.display = "none";
-    previewEl.style.display = "block";
+    // Hide placeholder, show canvas
+    if (placeholder) placeholder.style.display = "none";
+    canvas.style.display = "block";
 
     const reader = new FileReader();
     reader.onload = (e) => {
@@ -471,7 +472,15 @@ function initInteractivePreview() {
                 case "resize": initResizeMode(canvas, img, config); break;
             }
         };
+        img.onerror = () => {
+            if (placeholder) placeholder.style.display = "flex";
+            canvas.style.display = "none";
+        };
         img.src = e.target.result;
+    };
+    reader.onerror = () => {
+        if (placeholder) placeholder.style.display = "flex";
+        canvas.style.display = "none";
     };
     reader.readAsDataURL(file);
 }
@@ -1038,11 +1047,6 @@ addFiles = function(fileList) {
     const previewEl = document.getElementById("interactive-preview");
     if (previewEl && selectedFiles.length > 0 && selectedFiles[0].type.startsWith("image/")) {
         initInteractivePreview();
-    } else if (previewEl) {
-        previewEl.style.display = "none";
-        previewState = null;
-        const uploadZone = document.getElementById("upload-zone");
-        if (uploadZone) uploadZone.style.display = "";
     }
 };
 
@@ -1051,9 +1055,14 @@ removeFile = function(idx) {
     origRemoveFile(idx);
     const previewEl = document.getElementById("interactive-preview");
     if (selectedFiles.length === 0 && previewEl) {
-        previewEl.style.display = "none";
         previewState = null;
-        const uploadZone = document.getElementById("upload-zone");
-        if (uploadZone) uploadZone.style.display = "";
+        const canvas = document.getElementById("preview-canvas");
+        const placeholder = document.getElementById("preview-placeholder");
+        const info = document.getElementById("preview-info");
+        const toolbar = document.getElementById("preview-toolbar");
+        if (canvas) { canvas.style.display = "none"; canvas.width = 0; canvas.height = 0; }
+        if (placeholder) placeholder.style.display = "flex";
+        if (info) info.innerHTML = "";
+        if (toolbar) toolbar.innerHTML = "";
     }
 };

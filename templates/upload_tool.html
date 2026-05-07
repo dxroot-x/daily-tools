@@ -32,9 +32,13 @@
         </div>
 
         {% if interactive_preview %}
-        <div class="interactive-preview" id="interactive-preview" style="display:none">
-            <div class="interactive-canvas-wrap">
+        <div class="interactive-preview" id="interactive-preview">
+            <div class="interactive-canvas-wrap" id="interactive-canvas-wrap">
                 <canvas id="preview-canvas"></canvas>
+                <div class="preview-placeholder" id="preview-placeholder">
+                    <i class="bi bi-arrows-angle-expand"></i>
+                    <p>Upload an image to begin editing</p>
+                </div>
             </div>
             <div class="preview-toolbar" id="preview-toolbar"></div>
             <div class="preview-info" id="preview-info"></div>
