@@ -12,60 +12,65 @@
         <label>Input Text</label>
         <textarea id="case-input" class="text-input" rows="4" placeholder="Type or paste your text here..." oninput="convertAll()"></textarea>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:.8rem">
+    <div class="case-grid">
         <div class="calc-section">
-            <div class="pane-header" style="margin:-1.2rem -1.2rem .8rem;padding:.5rem .8rem"><span>UPPERCASE</span>
+            <div class="case-header"><span>UPPERCASE</span>
                 <button class="btn btn-small" onclick="copyText('case-upper')"><i class="bi bi-clipboard"></i></button>
             </div>
-            <div id="case-upper" style="font-size:.9rem;word-break:break-word;min-height:2em"></div>
+            <div id="case-upper" class="case-output"></div>
         </div>
         <div class="calc-section">
-            <div class="pane-header" style="margin:-1.2rem -1.2rem .8rem;padding:.5rem .8rem"><span>lowercase</span>
+            <div class="case-header"><span>lowercase</span>
                 <button class="btn btn-small" onclick="copyText('case-lower')"><i class="bi bi-clipboard"></i></button>
             </div>
-            <div id="case-lower" style="font-size:.9rem;word-break:break-word;min-height:2em"></div>
+            <div id="case-lower" class="case-output"></div>
         </div>
         <div class="calc-section">
-            <div class="pane-header" style="margin:-1.2rem -1.2rem .8rem;padding:.5rem .8rem"><span>Title Case</span>
+            <div class="case-header"><span>Title Case</span>
                 <button class="btn btn-small" onclick="copyText('case-title')"><i class="bi bi-clipboard"></i></button>
             </div>
-            <div id="case-title" style="font-size:.9rem;word-break:break-word;min-height:2em"></div>
+            <div id="case-title" class="case-output"></div>
         </div>
         <div class="calc-section">
-            <div class="pane-header" style="margin:-1.2rem -1.2rem .8rem;padding:.5rem .8rem"><span>Sentence case</span>
+            <div class="case-header"><span>Sentence case</span>
                 <button class="btn btn-small" onclick="copyText('case-sentence')"><i class="bi bi-clipboard"></i></button>
             </div>
-            <div id="case-sentence" style="font-size:.9rem;word-break:break-word;min-height:2em"></div>
+            <div id="case-sentence" class="case-output"></div>
         </div>
         <div class="calc-section">
-            <div class="pane-header" style="margin:-1.2rem -1.2rem .8rem;padding:.5rem .8rem"><span>camelCase</span>
+            <div class="case-header"><span>camelCase</span>
                 <button class="btn btn-small" onclick="copyText('case-camel')"><i class="bi bi-clipboard"></i></button>
             </div>
-            <div id="case-camel" style="font-size:.9rem;word-break:break-word;min-height:2em"></div>
+            <div id="case-camel" class="case-output"></div>
         </div>
         <div class="calc-section">
-            <div class="pane-header" style="margin:-1.2rem -1.2rem .8rem;padding:.5rem .8rem"><span>snake_case</span>
+            <div class="case-header"><span>snake_case</span>
                 <button class="btn btn-small" onclick="copyText('case-snake')"><i class="bi bi-clipboard"></i></button>
             </div>
-            <div id="case-snake" style="font-size:.9rem;word-break:break-word;min-height:2em"></div>
+            <div id="case-snake" class="case-output"></div>
         </div>
         <div class="calc-section">
-            <div class="pane-header" style="margin:-1.2rem -1.2rem .8rem;padding:.5rem .8rem"><span>kebab-case</span>
+            <div class="case-header"><span>kebab-case</span>
                 <button class="btn btn-small" onclick="copyText('case-kebab')"><i class="bi bi-clipboard"></i></button>
             </div>
-            <div id="case-kebab" style="font-size:.9rem;word-break:break-word;min-height:2em"></div>
+            <div id="case-kebab" class="case-output"></div>
         </div>
         <div class="calc-section">
-            <div class="pane-header" style="margin:-1.2rem -1.2rem .8rem;padding:.5rem .8rem"><span>PascalCase</span>
+            <div class="case-header"><span>PascalCase</span>
                 <button class="btn btn-small" onclick="copyText('case-pascal')"><i class="bi bi-clipboard"></i></button>
             </div>
-            <div id="case-pascal" style="font-size:.9rem;word-break:break-word;min-height:2em"></div>
+            <div id="case-pascal" class="case-output"></div>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
+<style>
+.case-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
+.case-header{display:flex;justify-content:space-between;align-items:center;padding:.5rem .8rem;margin:-1.3rem -1.3rem .6rem;background:var(--bg-overlay);border-bottom:1px solid var(--border-default);border-radius:var(--radius-md) var(--radius-md) 0 0;font-size:.8rem;font-weight:600;color:var(--text-secondary)}
+.case-output{font-size:.9rem;word-break:break-word;min-height:2em;color:var(--text-primary)}
+</style>
 <script>
 function copyText(id) { navigator.clipboard.writeText(document.getElementById(id).textContent); }
 

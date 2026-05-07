@@ -8,9 +8,9 @@
         <h1>JSON / YAML Converter</h1>
         <p>Convert between JSON and YAML formats</p>
     </div>
-    <div style="margin-bottom:1rem">
-        <button class="btn btn-primary" id="btn-j2y" onclick="setMode('j2y')" style="opacity:1">JSON &rarr; YAML</button>
-        <button class="btn btn-primary" id="btn-y2j" onclick="setMode('y2j')" style="opacity:.5">YAML &rarr; JSON</button>
+    <div class="toggle-group">
+        <button class="toggle-btn active" id="btn-j2y" onclick="setMode('j2y')">JSON &rarr; YAML</button>
+        <button class="toggle-btn" id="btn-y2j" onclick="setMode('y2j')">YAML &rarr; JSON</button>
     </div>
     <div class="split-pane">
         <div class="pane">
@@ -39,8 +39,8 @@
 let mode = "j2y";
 function setMode(m) {
     mode = m;
-    document.getElementById("btn-j2y").style.opacity = m === "j2y" ? 1 : .5;
-    document.getElementById("btn-y2j").style.opacity = m === "y2j" ? 1 : .5;
+    document.getElementById("btn-j2y").classList.toggle("active", m === "j2y");
+    document.getElementById("btn-y2j").classList.toggle("active", m === "y2j");
     document.getElementById("jy-input-label").textContent = m === "j2y" ? "JSON Input" : "YAML Input";
     document.getElementById("jy-output-label").textContent = m === "j2y" ? "YAML Output" : "JSON Output";
 }

@@ -8,9 +8,9 @@
         <h1>CSV / JSON Converter</h1>
         <p>Convert between CSV and JSON formats</p>
     </div>
-    <div style="margin-bottom:1rem">
-        <button class="btn btn-primary" id="btn-csv" onclick="setMode('csv')" style="opacity:1">CSV &rarr; JSON</button>
-        <button class="btn btn-primary" id="btn-json" onclick="setMode('json')" style="opacity:.5">JSON &rarr; CSV</button>
+    <div class="toggle-group">
+        <button class="toggle-btn active" id="btn-csv" onclick="setMode('csv')">CSV &rarr; JSON</button>
+        <button class="toggle-btn" id="btn-json" onclick="setMode('json')">JSON &rarr; CSV</button>
     </div>
     <div class="split-pane">
         <div class="pane">
@@ -40,8 +40,8 @@ let mode = "csv";
 
 function setMode(m) {
     mode = m;
-    document.getElementById("btn-csv").style.opacity = m === "csv" ? 1 : .5;
-    document.getElementById("btn-json").style.opacity = m === "json" ? 1 : .5;
+    document.getElementById("btn-csv").classList.toggle("active", m === "csv");
+    document.getElementById("btn-json").classList.toggle("active", m === "json");
     document.getElementById("input-label").textContent = m === "csv" ? "CSV Input" : "JSON Input";
     document.getElementById("output-label").textContent = m === "csv" ? "JSON Output" : "CSV Output";
 }

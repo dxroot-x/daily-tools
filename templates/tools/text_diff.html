@@ -29,16 +29,16 @@
 
 {% block scripts %}
 <style>
-.diff-view { font-family: "Consolas","Monaco",monospace; font-size: .85rem; border: 1px solid var(--border); border-radius: var(--radius); overflow: auto; max-height: 500px; }
-.diff-line { padding: .15rem .6rem; white-space: pre-wrap; word-break: break-word; display: flex; }
-.diff-num { color: var(--text-light); min-width: 3rem; text-align: right; padding-right: .6rem; user-select: none; flex-shrink: 0; }
-.diff-add { background: #d4edda; }
-.diff-del { background: #f8d7da; }
-.diff-ctx { background: var(--surface); }
-.diff-hdr { background: var(--bg); color: var(--text-light); font-weight: 600; padding: .3rem .6rem; }
-.diff-stats { font-size: .85rem; margin-bottom: .5rem; }
-.diff-stats .add { color: #28a745; font-weight: 600; }
-.diff-stats .del { color: var(--danger); font-weight: 600; }
+.diff-view{font-family:var(--font-mono);font-size:.85rem;border:1px solid var(--border-default);border-radius:var(--radius-sm);overflow:auto;max-height:500px}
+.diff-line{padding:.15rem .8rem;white-space:pre-wrap;word-break:break-word;display:flex}
+.diff-num{color:var(--text-tertiary);min-width:3rem;text-align:right;padding-right:.8rem;user-select:none;flex-shrink:0}
+.diff-add{background:rgba(16,185,129,.12);color:#6ee7b7}
+.diff-del{background:rgba(244,63,94,.12);color:#fda4af}
+.diff-ctx{background:transparent;color:var(--text-secondary)}
+.diff-hdr{background:var(--bg-elevated);color:var(--text-secondary);font-weight:600;padding:.3rem .8rem}
+.diff-stats{font-size:.85rem;margin-bottom:.5rem}
+.diff-stats .add{color:var(--success);font-weight:600}
+.diff-stats .del{color:var(--danger);font-weight:600}
 </style>
 <script>
 function computeDiff() {

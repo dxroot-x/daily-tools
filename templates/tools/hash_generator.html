@@ -15,39 +15,43 @@
     </div>
 
     <div id="hash-results" style="display:grid;gap:.8rem">
-        <div class="calc-section" id="hash-md5-section">
-            <div class="pane-header" style="margin:-1.2rem -1.2rem .5rem;padding:.4rem .8rem">
+        <div class="calc-section">
+            <div class="hash-header">
                 <span>MD5</span>
                 <button class="btn btn-small" onclick="copyHash('hash-md5')"><i class="bi bi-clipboard"></i></button>
             </div>
-            <code id="hash-md5" style="word-break:break-all;font-size:.85rem;color:var(--text-light)">-</code>
+            <code id="hash-md5" class="hash-value">-</code>
         </div>
         <div class="calc-section">
-            <div class="pane-header" style="margin:-1.2rem -1.2rem .5rem;padding:.4rem .8rem">
+            <div class="hash-header">
                 <span>SHA-1</span>
                 <button class="btn btn-small" onclick="copyHash('hash-sha1')"><i class="bi bi-clipboard"></i></button>
             </div>
-            <code id="hash-sha1" style="word-break:break-all;font-size:.85rem;color:var(--text-light)">-</code>
+            <code id="hash-sha1" class="hash-value">-</code>
         </div>
         <div class="calc-section">
-            <div class="pane-header" style="margin:-1.2rem -1.2rem .5rem;padding:.4rem .8rem">
+            <div class="hash-header">
                 <span>SHA-256</span>
                 <button class="btn btn-small" onclick="copyHash('hash-sha256')"><i class="bi bi-clipboard"></i></button>
             </div>
-            <code id="hash-sha256" style="word-break:break-all;font-size:.85rem;color:var(--text-light)">-</code>
+            <code id="hash-sha256" class="hash-value">-</code>
         </div>
         <div class="calc-section">
-            <div class="pane-header" style="margin:-1.2rem -1.2rem .5rem;padding:.4rem .8rem">
+            <div class="hash-header">
                 <span>SHA-512</span>
                 <button class="btn btn-small" onclick="copyHash('hash-sha512')"><i class="bi bi-clipboard"></i></button>
             </div>
-            <code id="hash-sha512" style="word-break:break-all;font-size:.85rem;color:var(--text-light)">-</code>
+            <code id="hash-sha512" class="hash-value">-</code>
         </div>
     </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
+<style>
+.hash-header{display:flex;justify-content:space-between;align-items:center;padding:.4rem .8rem;margin:-1.3rem -1.3rem .6rem;background:var(--bg-overlay);border-bottom:1px solid var(--border-default);border-radius:var(--radius-md) var(--radius-md) 0 0;font-size:.8rem;font-weight:600;color:var(--text-secondary)}
+.hash-value{word-break:break-all;font-size:.83rem;color:var(--text-primary);font-family:var(--font-mono)}
+</style>
 <script>
 async function computeHashes() {
     const text = document.getElementById("hash-input").value;

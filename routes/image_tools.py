@@ -59,10 +59,15 @@ FORMAT_MAP = {
 def resize_page():
     return render_template("upload_tool.html",
         title="Resize Image",
-        description="Resize images by percentage or specific dimensions",
+        description="Resize images — live preview shows new dimensions",
         endpoint="/image/resize",
         accept=IMAGE_ACCEPT,
         multiple=False,
+        interactive_preview=True,
+        interactive_config={
+            "type": "resize",
+            "toolbar": [],
+        },
         options=[
             {"type": "select", "name": "mode", "label": "Resize Mode",
              "choices": [
@@ -130,13 +135,27 @@ def remove_bg_page():
 def crop_page():
     return render_template("upload_tool.html",
         title="Crop Image",
-        description="Crop images using preset ratios or custom coordinates",
+        description="Crop images interactively — drag handles or use preset ratios",
         endpoint="/image/crop",
         accept=IMAGE_ACCEPT,
         multiple=False,
+        interactive_preview=True,
+        interactive_config={
+            "type": "crop",
+            "toolbar": [
+                {"group": "Ratio", "type": "ratio-btn", "label": "Free", "action": "ratio-free", "ratio": "free"},
+                {"group": "Ratio", "type": "ratio-btn", "label": "1:1", "action": "ratio-square", "ratio": "1"},
+                {"group": "Ratio", "type": "ratio-btn", "label": "4:3", "action": "ratio-4-3", "ratio": "4/3"},
+                {"group": "Ratio", "type": "ratio-btn", "label": "16:9", "action": "ratio-16-9", "ratio": "16/9"},
+                {"group": "Ratio", "type": "ratio-btn", "label": "9:16", "action": "ratio-9-16", "ratio": "9/16"},
+                {"group": "Actions", "action": "reset", "label": "<i class='bi bi-arrow-counterclockwise'></i> Reset"},
+                {"group": "Actions", "action": "apply", "label": "<i class='bi bi-crop'></i> Crop"},
+            ],
+        },
         options=[
             {"type": "select", "name": "mode", "label": "Crop Mode",
              "choices": [
+                 {"value": "interactive", "label": "Interactive (drag to crop)"},
                  {"value": "ratio", "label": "Aspect Ratio (center crop)"},
                  {"value": "custom", "label": "Custom Coordinates"},
              ]},
@@ -164,13 +183,25 @@ def crop_page():
 def rotate_page():
     return render_template("upload_tool.html",
         title="Rotate / Flip Image",
-        description="Rotate or flip images",
+        description="Rotate by any angle or flip — preview live before applying",
         endpoint="/image/rotate",
         accept=IMAGE_ACCEPT,
         multiple=False,
+        interactive_preview=True,
+        interactive_config={
+            "type": "rotate",
+            "toolbar": [
+                {"group": "Angle", "type": "range", "action": "angle", "min": 0, "max": 360, "value": 0, "step": 1},
+                {"group": "Flip", "type": "checkbox", "action": "flip-h", "label": "Flip H"},
+                {"group": "Flip", "type": "checkbox", "action": "flip-v", "label": "Flip V"},
+                {"group": "Actions", "action": "reset", "label": "<i class='bi bi-arrow-counterclockwise'></i> Reset"},
+                {"group": "Actions", "action": "apply", "label": "<i class='bi bi-check-lg'></i> Apply"},
+            ],
+        },
         options=[
             {"type": "select", "name": "action", "label": "Action",
              "choices": [
+                 {"value": "custom", "label": "Custom Angle (drag slider above)"},
                  {"value": "90", "label": "Rotate 90° Clockwise"},
                  {"value": "180", "label": "Rotate 180°"},
                  {"value": "270", "label": "Rotate 90° Counter-clockwise"},
@@ -239,14 +270,20 @@ def ocr_page():
 def watermark_page():
     return render_template("upload_tool.html",
         title="Add Watermark",
-        description="Add a text watermark to images",
+        description="Add a text watermark — drag to position, adjust opacity live",
         endpoint="/image/watermark",
         accept=IMAGE_ACCEPT,
         multiple=False,
+        interactive_preview=True,
+        interactive_config={
+            "type": "watermark",
+            "toolbar": [],
+        },
         options=[
             {"type": "text", "name": "text", "label": "Watermark Text", "placeholder": "Your watermark text"},
             {"type": "select", "name": "position", "label": "Position",
              "choices": [
+                 {"value": "interactive", "label": "Interactive (drag on preview)"},
                  {"value": "center", "label": "Center"},
                  {"value": "bottom-right", "label": "Bottom Right"},
                  {"value": "bottom-left", "label": "Bottom Left"},
@@ -366,7 +403,18 @@ def crop():
     img = get_pil_image(files[0])
     mode = request.form.get("mode", "ratio")
 
-    if mode == "ratio":
+    if mode == "interactive":
+        x = float(request.form.get("crop_x", 0))
+        y = float(request.form.get("crop_y", 0))
+        w = float(request.form.get("crop_w", 1))
+        h = float(request.form.get("crop_h", 1))
+        box = (
+            int(x * img.width),
+            int(y * img.height),
+            int((x + w) * img.width),
+            int((y + h) * img.height),
+        )
+    elif mode == "ratio":
         ratio_str = request.form.get("ratio", "1:1")
         rw, rh = [int(x) for x in ratio_str.split(":")]
         target_ratio = rw / rh
@@ -406,7 +454,17 @@ def rotate():
     action = request.form.get("action", "90")
     img = get_pil_image(files[0])
 
-    if action == "90":
+    if action == "custom":
+        angle = float(request.form.get("angle", 0))
+        flip_h = request.form.get("flip_h") == "on"
+        flip_v = request.form.get("flip_v") == "on"
+        if flip_h:
+            img = img.transpose(Image.FLIP_LEFT_RIGHT)
+        if flip_v:
+            img = img.transpose(Image.FLIP_TOP_BOTTOM)
+        if angle:
+            img = img.rotate(-angle, expand=True, resample=Image.BICUBIC)
+    elif action == "90":
         img = img.rotate(-90, expand=True)
     elif action == "180":
         img = img.rotate(180, expand=True)
@@ -454,7 +512,16 @@ def watermark():
     bbox = draw.textbbox((0, 0), text, font=font)
     tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
 
-    if position == "tiled":
+    # Support interactive position from canvas drag
+    pos_x = float(request.form.get("pos_x", -1))
+    pos_y = float(request.form.get("pos_y", -1))
+    interactive_pos = request.form.get("position", "") == "interactive"
+
+    if interactive_pos and pos_x >= 0:
+        px = int(pos_x * img.width) - tw // 2
+        py = int(pos_y * img.height) - th // 2
+        draw.text((px, py), text, fill=fill, font=font)
+    elif position == "tiled":
         step_x = tw + 60
         step_y = th + 60
         for y in range(0, img.height + step_y, step_y):

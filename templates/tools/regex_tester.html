@@ -40,12 +40,12 @@
 
 {% block scripts %}
 <style>
-.regex-hl { background: #fff3cd; border-bottom: 2px solid var(--warning); border-radius: 2px; }
-.regex-hl:nth-of-type(even) { background: #d1ecf1; border-bottom-color: #17a2b8; }
-.match-row { padding: .3rem 0; border-bottom: 1px solid var(--border); display: flex; gap: 1rem; }
-.match-idx { color: var(--text-light); min-width: 2rem; }
-.match-val { font-family: Consolas,Monaco,monospace; }
-.match-pos { color: var(--text-light); font-size: .8rem; }
+.regex-hl{background:rgba(245,158,11,.25);border-bottom:2px solid var(--warning);border-radius:2px}
+.regex-hl:nth-of-type(even){background:rgba(56,189,248,.2);border-bottom-color:var(--info)}
+.match-row{padding:.35rem 0;border-bottom:1px solid var(--border-default);display:flex;gap:1rem;align-items:center}
+.match-idx{color:var(--text-tertiary);min-width:2.5rem;font-weight:600}
+.match-val{font-family:var(--font-mono);color:var(--text-primary)}
+.match-pos{color:var(--text-tertiary);font-size:.8rem;margin-left:auto}
 </style>
 <script>
 function testRegex() {

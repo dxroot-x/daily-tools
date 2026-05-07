@@ -16,7 +16,7 @@
         <div class="sidebar-search">
             <div class="search-box">
                 <i class="bi bi-search"></i>
-                <input type="text" id="tool-search" placeholder="Search tools..." autocomplete="off">
+                <input type="text" id="tool-search" placeholder="Search tools..." autocomplete="off" aria-label="Search tools">
                 <kbd class="search-kbd">/</kbd>
             </div>
         </div>
@@ -46,7 +46,7 @@
 
     <main class="main-content">
         <header class="top-bar">
-            <button class="menu-btn" onclick="openSidebar()"><i class="bi bi-list"></i></button>
+            <button class="menu-btn" onclick="openSidebar()" aria-label="Open menu"><i class="bi bi-list"></i></button>
             <span class="top-title">{% block top_title %}Your Everyday Tools{% endblock %}</span>
         </header>
         <div class="content-area">

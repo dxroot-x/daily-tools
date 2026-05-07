@@ -9,10 +9,10 @@
         <p>Stay focused with timed work and break intervals</p>
     </div>
 
-    <div style="display:flex;gap:.3rem;margin-bottom:1.5rem;justify-content:center">
-        <button class="btn" id="tab-work" onclick="setTab('work')" style="background:var(--primary);color:#fff">Work</button>
-        <button class="btn" id="tab-short" onclick="setTab('short')" style="background:var(--bg)">Short Break</button>
-        <button class="btn" id="tab-long" onclick="setTab('long')" style="background:var(--bg)">Long Break</button>
+    <div class="toggle-group" style="justify-content:center">
+        <button class="toggle-btn active" id="tab-work" onclick="setTab('work')">Work</button>
+        <button class="toggle-btn" id="tab-short" onclick="setTab('short')">Short Break</button>
+        <button class="toggle-btn" id="tab-long" onclick="setTab('long')">Long Break</button>
     </div>
 
     <div class="calc-display" style="padding:2rem">
@@ -64,8 +64,7 @@ function setTab(tab) {
     timeLeft = durations[tab];
     updateDisplay();
     ["work","short","long"].forEach(t => {
-        document.getElementById("tab-" + t).style.background = t === tab ? "var(--primary)" : "var(--bg)";
-        document.getElementById("tab-" + t).style.color = t === tab ? "#fff" : "var(--text)";
+        document.getElementById("tab-" + t).classList.toggle("active", t === tab);
     });
     const labels = { work: "Work Session", short: "Short Break", long: "Long Break" };
     document.getElementById("pom-label").textContent = labels[tab];
